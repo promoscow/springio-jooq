@@ -14,6 +14,23 @@ class RestaurantRepositoryImpl(
     private val dsl: DSLContext
 ) : RestaurantRepository {
 
+    override fun insertAsFields(restaurant: Restaurant): Restaurant =
+        dsl
+            .insertInto(Restaurants.RESTAURANTS)
+            .set(Restaurants.RESTAURANTS.ID, restaurant.id)
+            .set(Restaurants.RESTAURANTS.NAME, restaurant.name)
+            .returning()
+            .map { it.toRestaurant() }
+            .single()
+
+    override fun insertAsRecord(restaurant: Restaurant): Restaurant =
+        dsl
+            .insertInto(Restaurants.RESTAURANTS)
+            .set(dsl.newRecord(Restaurants.RESTAURANTS, restaurant))
+            .returning()
+            .map { it.toRestaurant() }
+            .single()
+
     override fun getAllByUserOrdered(userId: UUID): List<Restaurant> =
         dsl
             .select(Restaurants.RESTAURANTS.ID, Restaurants.RESTAURANTS.NAME)
@@ -22,4 +39,11 @@ class RestaurantRepositoryImpl(
             .rightJoin(Orders.ORDERS).on(Orders.ORDERS.DISH_ID.eq(Dishes.DISHES.ID))
             .where(Orders.ORDERS.USER_ID.eq(userId))
             .fetchInto(Restaurant::class.java)
+
+    override fun getById(id: UUID): Restaurant =
+        dsl
+            .selectFrom(Restaurants.RESTAURANTS)
+            .where(Restaurants.RESTAURANTS.ID.eq(id))
+            .map { it.toRestaurant() }
+            .single()
 }
