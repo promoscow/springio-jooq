@@ -7,6 +7,7 @@ import ru.xpendence.jooq.repository.RestaurantRepository
 import ru.xpendence.jooq.repository.entity.tables.Dishes
 import ru.xpendence.jooq.repository.entity.tables.Orders
 import ru.xpendence.jooq.repository.entity.tables.Restaurants
+import ru.xpendence.jooq.repository.mapper.toRestaurant
 import java.util.UUID
 
 @Repository
@@ -31,6 +32,21 @@ class RestaurantRepositoryImpl(
             .map { it.toRestaurant() }
             .single()
 
+    override fun update(restaurant: Restaurant) {
+        dsl
+            .update(Restaurants.RESTAURANTS)
+            .set(Restaurants.RESTAURANTS.NAME, restaurant.name)
+            .where(Restaurants.RESTAURANTS.ID.eq(restaurant.id))
+            .execute()
+    }
+
+    override fun findById(id: UUID): Restaurant? =
+        dsl
+            .selectFrom(Restaurants.RESTAURANTS)
+            .where(Restaurants.RESTAURANTS.ID.eq(id))
+            .fetchInto(Restaurant::class.java)
+            .singleOrNull()
+
     override fun getAllByUserOrdered(userId: UUID): List<Restaurant> =
         dsl
             .select(Restaurants.RESTAURANTS.ID, Restaurants.RESTAURANTS.NAME)
@@ -46,4 +62,11 @@ class RestaurantRepositoryImpl(
             .where(Restaurants.RESTAURANTS.ID.eq(id))
             .map { it.toRestaurant() }
             .single()
+
+    override fun delete(id: UUID) {
+        dsl
+            .deleteFrom(Restaurants.RESTAURANTS)
+            .where(Restaurants.RESTAURANTS.ID.eq(id))
+            .execute()
+    }
 }

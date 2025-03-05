@@ -1,4 +1,4 @@
-package ru.xpendence.jooq.repository.impl
+package ru.xpendence.jooq.repository.mapper
 
 import org.jooq.Record
 import ru.xpendence.jooq.domain.Restaurant
